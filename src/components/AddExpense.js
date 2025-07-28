@@ -1,3 +1,4 @@
+// src/components/AddExpense.js
 import React, { useState } from 'react';
 
 const AddExpense = ({ onAdd }) => {
@@ -6,25 +7,25 @@ const AddExpense = ({ onAdd }) => {
   const [category, setCategory] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const BACKEND_URL = 'https://mern-expense-tracker-backend-s2qe.onrender.com/api/expenses';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title || !amount) return;
 
     setSubmitting(true);
     try {
-      const res = await fetch('http://localhost:5000/api/expenses', {
+      const res = await fetch(BACKEND_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ title, amount: Number(amount), category }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, amount: Number(amount), category })
       });
 
       if (res.ok) {
         setTitle('');
         setAmount('');
         setCategory('');
-        onAdd(); // callback to refresh
+        onAdd();
       }
     } catch (err) {
       console.error('Failed to add expense');

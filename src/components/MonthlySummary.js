@@ -9,38 +9,35 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const MonthlySummary = () => {
-  const [summary, setSummary] = useState([]);
-  const [categoryData, setCategoryData] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState('');
+const MonthlySummary = ({ expenses }) => {
+  const [categoryData, setCategoryData] = useState({});
 
-  // Fetch monthly data
   useEffect(() => {
-    fetch('http://localhost:5000/api/expenses')
-      .then((res) => res.json())
-      .then((data) => {
-        const currentMonth = new Date().getMonth();
-        const monthExpenses = data.filter(exp => new Date(exp.date).getMonth() === currentMonth);
-        const grouped = {};
-        monthExpenses.forEach(exp => {
-          grouped[exp.category] = (grouped[exp.category] || 0) + exp.amount;
-        });
-        setCategoryData(grouped);
-        setSelectedMonth(currentMonth);
-        setSummary(monthExpenses);
-      });
-  }, []);
+    const currentMonth = new Date().getMonth();
+    const monthExpenses = expenses.filter(exp => new Date(exp.date).getMonth() === currentMonth);
 
-  const total = summary.reduce((sum, exp) => sum + exp.amount, 0);
-  const average = (total / 30).toFixed(2); // Assuming 30-day month
+    const grouped = {};
+    monthExpenses.forEach(exp => {
+      const cat = exp.category || 'Uncategorized';
+      grouped[cat] = (grouped[cat] || 0) + exp.amount;
+    });
+
+    setCategoryData(grouped);
+  }, [expenses]);
+
+  const total = Object.values(categoryData).reduce((sum, val) => sum + val, 0);
+  const average = total > 0 ? (total / 30).toFixed(2) : 0;
+  const topCategory = Object.keys(categoryData).reduce((a, b) => categoryData[a] > categoryData[b] ? a : b, '');
 
   const chartData = {
     labels: Object.keys(categoryData),
-    datasets: [{
-      data: Object.values(categoryData),
-      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#82ca9d', '#c45850'],
-      hoverOffset: 6
-    }]
+    datasets: [
+      {
+        data: Object.values(categoryData),
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#82ca9d', '#c45850'],
+        hoverOffset: 6
+      }
+    ]
   };
 
   return (
@@ -56,7 +53,7 @@ const MonthlySummary = () => {
       <div style={{ marginTop: '1rem' }}>
         <p><strong>Total this month:</strong> ₹{total}</p>
         <p><strong>Average per day:</strong> ₹{average}</p>
-        <p><strong>Top category:</strong> {Object.keys(categoryData).reduce((a, b) => categoryData[a] > categoryData[b] ? a : b, '')}</p>
+        <p><strong>Top category:</strong> {topCategory || 'N/A'}</p>
       </div>
     </div>
   );

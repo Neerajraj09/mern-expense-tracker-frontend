@@ -13,7 +13,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const budgetLimit = 5000;
+  const [budgetLimit, setBudgetLimit] = useState(5000); // Editable limit
+  const [inputBudget, setInputBudget] = useState('');
 
   const fetchExpenses = () => {
     setLoading(true);
@@ -51,6 +52,16 @@ function App() {
       });
   };
 
+  const handleBudgetSubmit = (e) => {
+    e.preventDefault();
+    if (inputBudget) {
+      setBudgetLimit(Number(inputBudget));
+      setInputBudget('');
+      setMessage('✅ Budget updated');
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
   const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
   const isOverBudget = total > budgetLimit;
 
@@ -61,8 +72,22 @@ function App() {
         {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
       </button>
 
-      {message && <p className="msg">{message}</p>}
+      <form onSubmit={handleBudgetSubmit} style={{ marginTop: '1rem' }}>
+        <input
+          type="number"
+          placeholder="Set Budget Limit"
+          value={inputBudget}
+          onChange={(e) => setInputBudget(e.target.value)}
+          style={{ padding: '8px' }}
+        />
+        <button type="submit" style={{ padding: '8px', marginLeft: '8px' }}>
+          Set Budget
+        </button>
+      </form>
+
+      <p><strong>Budget Limit:</strong> ₹{budgetLimit}</p>
       {isOverBudget && <p className="warning">⚠️ Budget limit exceeded! ₹{total}</p>}
+      {message && <p className="msg">{message}</p>}
 
       <AddExpense onAdd={handleAddExpense} />
       <MonthlySummary expenses={expenses} />

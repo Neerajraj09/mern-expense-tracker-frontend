@@ -1,3 +1,4 @@
+// src/components/TotalChart.js
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 
@@ -16,13 +17,7 @@ const TotalChart = ({ expenses }) => {
     <div style={{ marginBottom: '2rem' }}>
       <h4>Category Breakdown</h4>
       <PieChart width={300} height={200}>
-        <Pie
-          data={data}
-          dataKey="value"
-          nameKey="name"
-          outerRadius={70}
-          fill="#8884d8"
-        >
+        <Pie data={data} dataKey="value" nameKey="name" outerRadius={70} fill="#8884d8">
           {data.map((_, i) => (
             <Cell key={i} fill={COLORS[i % COLORS.length]} />
           ))}
