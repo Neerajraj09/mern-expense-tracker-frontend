@@ -13,7 +13,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const [budgetLimit, setBudgetLimit] = useState(5000); // Editable limit
+  const [budgetLimit, setBudgetLimit] = useState(50000); // Editable limit
   const [inputBudget, setInputBudget] = useState('');
 
   const fetchExpenses = () => {
