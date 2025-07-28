@@ -6,16 +6,18 @@ import FeedbackForm from './components/FeedbackForm';
 import MonthlySummary from './components/MonthlySummary';
 import './index.css';
 
+const BACKEND_URL = 'https://mern-expense-tracker-backend-s2qe.onrender.com/api/expenses';
+
 function App() {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [budgetLimit, setBudgetLimit] = useState(1000); // You can change default
-  const [showWarning, setShowWarning] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const budgetLimit = 5000;
 
   const fetchExpenses = () => {
     setLoading(true);
-    fetch('http://localhost:5000/api/expenses')
+    fetch(BACKEND_URL)
       .then((res) => res.json())
       .then((data) => {
         setExpenses(data);
@@ -28,11 +30,6 @@ function App() {
     fetchExpenses();
   }, []);
 
-  useEffect(() => {
-    const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-    setShowWarning(total > budgetLimit);
-  }, [expenses, budgetLimit]);
-
   const handleAddExpense = () => {
     fetchExpenses();
     setMessage('✅ Expense added!');
@@ -40,7 +37,7 @@ function App() {
   };
 
   const handleDeleteExpense = (id) => {
-    fetch(`http://localhost:5000/api/expenses/${id}`, {
+    fetch(`${BACKEND_URL}/${id}`, {
       method: 'DELETE'
     })
       .then(() => {
@@ -55,30 +52,20 @@ function App() {
   };
 
   const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const isOverBudget = total > budgetLimit;
 
   return (
-    <div className="container">
+    <div className={darkMode ? 'dark container' : 'container'}>
       <h1>Expense Tracker</h1>
+      <button onClick={() => setDarkMode(!darkMode)} className="dark-toggle">
+        {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+      </button>
+
       {message && <p className="msg">{message}</p>}
-
-      <div style={{ marginBottom: '1rem' }}>
-        <label><strong>Set Budget Limit: ₹</strong></label>
-        <input
-          type="number"
-          value={budgetLimit}
-          onChange={(e) => setBudgetLimit(Number(e.target.value))}
-          style={{ padding: '5px', width: '100px', marginLeft: '10px' }}
-        />
-      </div>
-
-      {showWarning && (
-        <p style={{ color: 'red', fontWeight: 'bold' }}>
-          ⚠️ Budget exceeded! Try to reduce your spending.
-        </p>
-      )}
+      {isOverBudget && <p className="warning">⚠️ Budget limit exceeded! ₹{total}</p>}
 
       <AddExpense onAdd={handleAddExpense} />
-
+      <MonthlySummary expenses={expenses} />
       {loading ? (
         <p>Loading expenses...</p>
       ) : (
@@ -88,8 +75,6 @@ function App() {
           <ExpenseList expenses={expenses} onDelete={handleDeleteExpense} />
         </>
       )}
-
-      <MonthlySummary expenses={expenses} />
       <FeedbackForm />
       <footer>Made by Neeraj</footer>
     </div>
